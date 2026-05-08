@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRODIGY SYSTEMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #080808;
+    --white: #F2EDE6;
+    --orange: #C4622D;
+    --gold: #B8922A;
+    --steel: #2A2A2A;
+    --fog: rgba(242,237,230,0.05);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Syne', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* CUSTOM CURSOR */
+  #cursor {
+    position: fixed;
+    width: 12px; height: 12px;
+    background: var(--orange);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s, width 0.3s, height 0.3s, background 0.3s;
+    mix-blend-mode: normal;
+  }
+  #cursor-ring {
+    position: fixed;
+    width: 40px; height: 40px;
+    border: 1px solid rgba(196,98,45,0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: all 0.15s ease;
+  }
+  body:hover #cursor { opacity: 1; }
+
+  /* CANVAS */
+  #bg-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 28px 60px;
+    background: linear-gradient(to bottom, rgba(8,8,8,0.9), transparent);
+    backdrop-filter: blur(0px);
+  }
+
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 4px;
+    color: var(--white);
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--orange); }
+
+  .nav-links {
+    display: flex;
+    gap: 48px;
+    list-style: none;
+  }
+  .nav-links a {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(242,237,230,0.6);
+    text-decoration: none;
+    transition: color 0.3s;
+    position: relative;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; left: 0;
+    width: 0; height: 1px;
+    background: var(--orange);
+    transition: width 0.4s;
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-links a:hover::after { width: 100%; }
+
+  /* SECTIONS */
+  .section {
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+  }
+
+  /* HERO */
+  #hero {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 0 60px;
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 6px;
+    color: var(--orange);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 1s 0.3s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(80px, 12vw, 180px);
+    line-height: 0.9;
+    letter-spacing: 2px;
+    margin-bottom: 40px;
+    opacity: 0;
+    transform: translateY(40px);
+    animation: fadeUp 1.2s 0.5s forwards;
+  }
+
+  .hero-title .line2 { 
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(242,237,230,0.4);
+    display: block;
+  }
+  .hero-title .accent { color: var(--orange); }
+
+  .hero-sub {
+    font-size: 15px;
+    line-height: 1.8;
+    color: rgba(242,237,230,0.55);
+    max-width: 440px;
+    margin-bottom: 56px;
+    opacity: 0;
+    animation: fadeUp 1s 0.8s forwards;
+  }
+
+  .hero-cta-group {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    opacity: 0;
+    animation: fadeUp 1s 1s forwards;
+  }
+
+  .btn-primary {
+    background: var(--orange);
+    color: var(--white);
+    padding: 18px 44px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    border: none;
+    cursor: none;
+    transition: all 0.4s;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gold);
+    transform: translateX(-101%);
+    transition: transform 0.4s ease;
+  }
+  .btn-primary:hover::before { transform: translateX(0); }
+  .btn-primary span { position: relative; z-index: 1; }
+
+  .btn-ghost {
+    background: transparent;
+    color: rgba(242,237,230,0.6);
+    padding: 18px 44px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    border: 1px solid rgba(242,237,230,0.2);
+    cursor: none;
+    transition: all 0.4s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-ghost:hover {
+    color: var(--white);
+    border-color: var(--orange);
+  }
+
+  /* SCROLLING TICKER */
+  .ticker-wrap {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: var(--orange);
+    padding: 14px 0;
+    overflow: hidden;
+    z-index: 20;
+  }
+  .ticker-track {
+    display: flex;
+    white-space: nowrap;
+    animation: ticker 20s linear infinite;
+  }
+  .ticker-item {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 15px;
+    letter-spacing: 4px;
+    padding: 0 48px;
+    color: var(--black);
+  }
+  .ticker-sep { color: rgba(0,0,0,0.4); }
+
+  /* 3D BUILDING SECTION */
+  #building-section {
+    padding: 160px 60px;
+    display: flex;
+    gap: 100px;
+    align-items: center;
+  }
+
+  .building-canvas-wrap {
+    flex: 0 0 500px;
+    height: 500px;
+    position: relative;
+  }
+
+  #building-canvas {
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgba(196,98,45,0.15);
+  }
+
+  .building-info { flex: 1; }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 6px;
+    color: var(--orange);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .section-label::before {
+    content: '';
+    width: 40px; height: 1px;
+    background: var(--orange);
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 6vw, 80px);
+    line-height: 1;
+    margin-bottom: 28px;
+  }
+
+  .section-body {
+    font-size: 15px;
+    line-height: 1.9;
+    color: rgba(242,237,230,0.55);
+    margin-bottom: 48px;
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+
+  .stat-item {}
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    color: var(--orange);
+    line-height: 1;
+  }
+  .stat-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: rgba(242,237,230,0.4);
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* SERVICES */
+  #services {
+    padding: 160px 60px;
+  }
+
+  .services-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 80px;
+  }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+
+  .service-card {
+    background: var(--steel);
+    padding: 56px 44px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    cursor: none;
+    border-top: 1px solid rgba(196,98,45,0);
+  }
+  .service-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(196,98,45,0.08), transparent);
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+  .service-card:hover {
+    transform: translateY(-8px);
+    border-top: 1px solid var(--orange);
+    z-index: 2;
+  }
+  .service-card:hover::before { opacity: 1; }
+
+  .service-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 72px;
+    color: rgba(196,98,45,0.12);
+    line-height: 1;
+    margin-bottom: 24px;
+    transition: color 0.5s;
+  }
+  .service-card:hover .service-num { color: rgba(196,98,45,0.3); }
+
+  .service-icon {
+    width: 48px; height: 48px;
+    margin-bottom: 28px;
+    color: var(--orange);
+  }
+
+  .service-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+  }
+
+  .service-desc {
+    font-size: 13px;
+    line-height: 1.9;
+    color: rgba(242,237,230,0.45);
+  }
+
+  .service-arrow {
+    position: absolute;
+    bottom: 44px; right: 44px;
+    width: 36px; height: 36px;
+    border: 1px solid rgba(196,98,45,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.4s;
+    color: var(--orange);
+  }
+  .service-card:hover .service-arrow {
+    background: var(--orange);
+    color: var(--black);
+    transform: rotate(45deg);
+  }
+
+  /* PARALLAX BANNER */
+  #parallax-banner {
+    height: 60vh;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .parallax-bg {
+    position: absolute;
+    inset: -20%;
+    background: linear-gradient(135deg, #0D0D0D 0%, #1A1208 50%, #0D0D0D 100%);
+    z-index: 0;
+  }
+  .parallax-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(196,98,45,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(196,98,45,0.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+    z-index: 1;
+  }
+  .parallax-text {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+  }
+  .parallax-quote {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 8vw, 120px);
+    line-height: 1;
+    letter-spacing: 4px;
+  }
+  .parallax-quote .outline {
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(242,237,230,0.2);
+  }
+  .parallax-quote .filled { color: var(--orange); }
+
+  /* WHY US */
+  #why-us {
+    padding: 160px 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 120px;
+    align-items: center;
+  }
+
+  .why-list { list-style: none; }
+  .why-item {
+    display: flex;
+    gap: 28px;
+    padding: 32px 0;
+    border-bottom: 1px solid rgba(242,237,230,0.06);
+    align-items: flex-start;
+    transition: all 0.4s;
+    cursor: none;
+  }
+  .why-item:hover { border-bottom-color: rgba(196,98,45,0.4); }
+
+  .why-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    color: var(--orange);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .why-content h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .why-content p {
+    font-size: 13px;
+    line-height: 1.8;
+    color: rgba(242,237,230,0.45);
+  }
+
+  /* CONTACT */
+  #contact {
+    padding: 160px 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 120px;
+  }
+
+  .contact-info {}
+  .contact-item {
+    margin-bottom: 40px;
+  }
+  .contact-item-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--orange);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .contact-item-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 2px;
+    color: var(--white);
+  }
+
+  .contact-form { display: flex; flex-direction: column; gap: 20px; }
+
+  .form-field {
+    position: relative;
+  }
+  .form-field input,
+  .form-field textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(242,237,230,0.15);
+    padding: 16px 0;
+    color: var(--white);
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.3s;
+    resize: none;
+  }
+  .form-field input:focus,
+  .form-field textarea:focus { border-bottom-color: var(--orange); }
+  .form-field input::placeholder,
+  .form-field textarea::placeholder {
+    color: rgba(242,237,230,0.25);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: 'Space Mono', monospace;
+  }
+  .form-field::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 0; height: 1px;
+    background: var(--orange);
+    transition: width 0.4s;
+  }
+  .form-field:focus-within::after { width: 100%; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid rgba(242,237,230,0.06);
+    padding: 40px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+  }
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 4px;
+  }
+  .footer-logo span { color: var(--orange); }
+  .footer-copy {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: rgba(242,237,230,0.3);
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* REVEAL */
+  .reveal {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 0.9s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+  .reveal-delay-5 { transition-delay: 0.5s; }
+
+  /* NOISE OVERLAY */
+  .noise {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    pointer-events: none;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-size: 200px;
+  }
+</style>
+</head>
+<body>
+
+<div class="noise"></div>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<canvas id="bg-canvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">PRODIGY<span>.</span></a>
+  <ul class="nav-links">
+    <li><a href="#building-section">About</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#why-us">Why Us</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero" class="section">
+  <div class="hero-eyebrow">Gaborone, Botswana · Est. 2024</div>
+  <h1 class="hero-title">
+    WE BUILD<br>
+    <span class="line2">WHAT <span class="accent">LASTS</span></span>
+  </h1>
+  <p class="hero-sub">Prodigy Systems is Botswana's premium construction partner — delivering precision-engineered structures built to stand a century.</p>
+  <div class="hero-cta-group">
+    <a href="#contact" class="btn-primary"><span>Start a Project</span></a>
+    <a href="#services" class="btn-ghost">Our Services</a>
+  </div>
+
+  <div class="ticker-wrap">
+    <div class="ticker-track">
+      <span class="ticker-item">General Construction <span class="ticker-sep">·</span></span>
+      <span class="ticker-item">Civil Works <span class="ticker-sep">·</span></span>
+      <span class="ticker-item">Project Management <span class="ticker-sep">·</span></span>
+      <span class="ticker-item">Renovation <span class="ticker-sep">·</span></span>
+      <span class="ticker-item">24/7 Operations <span class="ticker-sep">·</span></span>
+      <span class="ticker-item">Gaborone Based <span class="ticker-sep">·</span></span>
+      <span class="ticker-item">General Construction <span class="ticker-sep">·</span></span>
+      <span class="ticker-item">Civil Works <span class="ticker-sep">·</span></span>
+      <span class="ticker-item">Project Management <span class="ticker-sep">·</span></span>
+      <span class="ticker-item">Renovation <span class="ticker-sep">·</span></span>
+      <span class="ticker-item">24/7 Operations <span class="ticker-sep">·</span></span>
+      <span class="ticker-item">Gaborone Based <span class="ticker-sep">·</span></span>
+    </div>
+  </div>
+</section>
+
+<!-- 3D BUILDING -->
+<section id="building-section" class="section" style="min-height:auto;">
+  <div class="section-label">Interactive 3D Model</div>
+  <div style="display:flex; gap:100px; align-items:center; flex-wrap:wrap;">
+    <div class="building-canvas-wrap reveal">
+      <canvas id="building-canvas"></canvas>
+      <div style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:rgba(242,237,230,0.3);white-space:nowrap;">DRAG TO ROTATE</div>
+    </div>
+    <div class="building-info" style="flex:1;min-width:300px;">
+      <div class="section-label reveal">Who We Are</div>
+      <h2 class="section-title reveal reveal-delay-1">PRECISION.<br>STRUCTURE.<br><span style="color:var(--orange)">LEGACY.</span></h2>
+      <p class="section-body reveal reveal-delay-2">Prodigy Systems (Pty) Ltd. is a full-service construction company rooted in Gaborone, built on the belief that infrastructure shapes civilization. We don't just construct buildings — we engineer landmarks.</p>
+      <div class="stats-row reveal reveal-delay-3">
+        <div class="stat-item">
+          <div class="stat-num" data-target="47">0</div>
+          <div class="stat-label">Projects Delivered</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" data-target="12">0</div>
+          <div class="stat-label">Years Experience</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" data-target="24">0</div>
+          <div class="stat-label">Hour Operations</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services" class="section" style="min-height:auto;">
+  <div class="services-header">
+    <div>
+      <div class="section-label reveal">What We Do</div>
+      <h2 class="section-title reveal reveal-delay-1">OUR<br><span style="color:var(--orange)">SERVICES</span></h2>
+    </div>
+    <p style="max-width:320px;font-size:13px;line-height:1.9;color:rgba(242,237,230,0.4);" class="reveal reveal-delay-2">From breaking ground to final inspection — Prodigy Systems handles every phase with uncompromising precision.</p>
+  </div>
+
+  <div class="services-grid">
+    <div class="service-card reveal">
+      <div class="service-num">01</div>
+      <svg class="service-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="8" y="20" width="32" height="24" rx="1"/>
+        <path d="M2 20L24 4l22 16"/>
+        <path d="M18 44V32h12v12"/>
+      </svg>
+      <div class="service-title">General Construction</div>
+      <p class="service-desc">Residential, commercial, and industrial builds executed to the highest engineering standards.</p>
+      <div class="service-arrow">→</div>
+    </div>
+    <div class="service-card reveal reveal-delay-1">
+      <div class="service-num">02</div>
+      <svg class="service-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M6 42V14l18-8 18 8v28"/>
+        <rect x="18" y="28" width="12" height="14"/>
+        <path d="M6 22h36M6 30h36"/>
+      </svg>
+      <div class="service-title">Civil Works</div>
+      <p class="service-desc">Roads, drainage, foundations, and large-scale infrastructure built for permanence.</p>
+      <div class="service-arrow">→</div>
+    </div>
+    <div class="service-card reveal reveal-delay-2">
+      <div class="service-num">03</div>
+      <svg class="service-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="4" y="4" width="40" height="40" rx="2"/>
+        <path d="M4 16h40M16 16v28M28 16v28"/>
+      </svg>
+      <div class="service-title">Project Management</div>
+      <p class="service-desc">End-to-end oversight — scheduling, procurement, quality control, and delivery assurance.</p>
+      <div class="service-arrow">→</div>
+    </div>
+    <div class="service-card reveal reveal-delay-3">
+      <div class="service-num">04</div>
+      <svg class="service-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M8 40V20M8 20l16-14 16 14v20"/>
+        <circle cx="24" cy="28" r="6"/>
+        <path d="M10 40h28"/>
+      </svg>
+      <div class="service-title">Renovations</div>
+      <p class="service-desc">Transforming existing structures — interiors, facades, and structural upgrades done right.</p>
+      <div class="service-arrow">→</div>
+    </div>
+    <div class="service-card reveal reveal-delay-4">
+      <div class="service-num">05</div>
+      <svg class="service-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M24 4v40M4 24h40"/>
+        <circle cx="24" cy="24" r="16"/>
+        <circle cx="24" cy="24" r="6"/>
+      </svg>
+      <div class="service-title">Site Consultation</div>
+      <p class="service-desc">Expert site analysis, feasibility studies, and pre-construction advisory for any scale.</p>
+      <div class="service-arrow">→</div>
+    </div>
+    <div class="service-card reveal reveal-delay-5">
+      <div class="service-num">06</div>
+      <svg class="service-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M4 44l10-10M38 10l-4 4-6-6 4-4 6 6zM14 34L34 14"/>
+        <path d="M4 14c0-5.5 9-9 14-4L34 26c5 5 1 14-4 14"/>
+      </svg>
+      <div class="service-title">Concrete & Steel</div>
+      <p class="service-desc">Specialist concrete works and structural steel fabrication for demanding builds.</p>
+      <div class="service-arrow">→</div>
+    </div>
+  </div>
+</section>
+
+<!-- PARALLAX BANNER -->
+<section id="parallax-banner">
+  <div class="parallax-bg"></div>
+  <div class="parallax-grid"></div>
+  <div class="parallax-text">
+    <div class="parallax-quote">
+      <span class="outline">BUILT IN</span> <span class="filled">BOTSWANA.</span><br>
+      <span class="outline">BUILT FOR</span> <span class="filled">ETERNITY.</span>
+    </div>
+  </div>
+</section>
+
+<!-- WHY US -->
+<section id="why-us" class="section" style="min-height:auto;">
+  <div>
+    <div class="section-label reveal">The Prodigy Difference</div>
+    <h2 class="section-title reveal reveal-delay-1">WHY<br>CHOOSE<br><span style="color:var(--orange)">US?</span></h2>
+    <p class="section-body reveal reveal-delay-2">We operate where most contractors won't — at the intersection of quality and accountability. Every project carries our reputation.</p>
+  </div>
+  <ul class="why-list">
+    <li class="why-item reveal">
+      <span class="why-num">01</span>
+      <div class="why-content">
+        <h3>24/7 Operations</h3>
+        <p>We don't clock out. Our teams are available around the clock to meet critical deadlines and respond to site emergencies.</p>
+      </div>
+    </li>
+    <li class="why-item reveal reveal-delay-1">
+      <span class="why-num">02</span>
+      <div class="why-content">
+        <h3>Local Expertise</h3>
+        <p>Deep knowledge of Botswana's terrain, climate, regulations, and supply chains gives us an edge no outside firm can match.</p>
+      </div>
+    </li>
+    <li class="why-item reveal reveal-delay-2">
+      <span class="why-num">03</span>
+      <div class="why-content">
+        <h3>Transparent Process</h3>
+        <p>No hidden costs. No surprises. Every milestone, budget item, and decision is documented and communicated clearly.</p>
+      </div>
+    </li>
+    <li class="why-item reveal reveal-delay-3">
+      <span class="why-num">04</span>
+      <div class="why-content">
+        <h3>Licensed & Insured</h3>
+        <p>Fully compliant with all Botswana construction regulations. Your project and your investment are protected at every stage.</p>
+      </div>
+    </li>
+    <li class="why-item reveal reveal-delay-4">
+      <span class="why-num">05</span>
+      <div class="why-content">
+        <h3>Zero Defect Commitment</h3>
+        <p>We back every structure with rigorous quality assurance protocols and post-completion inspections.</p>
+      </div>
+    </li>
+  </ul>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="section" style="min-height:auto;">
+  <div>
+    <div class="section-label reveal">Get In Touch</div>
+    <h2 class="section-title reveal reveal-delay-1">START YOUR<br><span style="color:var(--orange)">PROJECT.</span></h2>
+    <div class="contact-item reveal reveal-delay-2">
+      <div class="contact-item-label">Phone</div>
+      <div class="contact-item-value">71 743 804</div>
+    </div>
+    <div class="contact-item reveal reveal-delay-3">
+      <div class="contact-item-label">Address</div>
+      <div class="contact-item-value">18177, Gaborone<br>Botswana</div>
+    </div>
+    <div class="contact-item reveal reveal-delay-4">
+      <div class="contact-item-label">Hours</div>
+      <div class="contact-item-value">Open 24 Hours</div>
+    </div>
+  </div>
+
+  <div class="contact-form reveal reveal-delay-2">
+    <div class="form-field">
+      <input type="text" placeholder="Your Name">
+    </div>
+    <div class="form-field">
+      <input type="email" placeholder="Email Address">
+    </div>
+    <div class="form-field">
+      <input type="text" placeholder="Project Type">
+    </div>
+    <div class="form-field">
+      <textarea rows="4" placeholder="Tell us about your project"></textarea>
+    </div>
+    <button class="btn-primary" style="align-self:flex-start;cursor:none;"><span>Send Message →</span></button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">PRODIGY<span>.</span>SYSTEMS</div>
+  <div class="footer-copy">© 2024 PRODIGY SYSTEMS (PTY) LTD. · GABORONE, BOTSWANA</div>
+</footer>
+
+<script>
+// ======== CUSTOM CURSOR ========
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx + 'px';
+  cursor.style.top = my + 'px';
+});
+
+function animateRing() {
+  rx += (mx - rx) * 0.12;
+  ry += (my - ry) * 0.12;
+  ring.style.left = rx + 'px';
+  ring.style.top = ry + 'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+
+document.querySelectorAll('a, button, .service-card, .why-item').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.style.width = '24px';
+    cursor.style.height = '24px';
+    ring.style.width = '60px';
+    ring.style.height = '60px';
+    ring.style.borderColor = 'rgba(196,98,45,0.8)';
+  });
+  el.addEventListener('mouseleave', () => {
+    cursor.style.width = '12px';
+    cursor.style.height = '12px';
+    ring.style.width = '40px';
+    ring.style.height = '40px';
+    ring.style.borderColor = 'rgba(196,98,45,0.5)';
+  });
+});
+
+// ======== PARTICLE BACKGROUND ========
+const bgCanvas = document.getElementById('bg-canvas');
+const bgCtx = bgCanvas.getContext('2d');
+bgCanvas.width = window.innerWidth;
+bgCanvas.height = window.innerHeight;
+
+window.addEventListener('resize', () => {
+  bgCanvas.width = window.innerWidth;
+  bgCanvas.height = window.innerHeight;
+});
+
+const particles = [];
+for (let i = 0; i < 80; i++) {
+  particles.push({
+    x: Math.random() * bgCanvas.width,
+    y: Math.random() * bgCanvas.height,
+    vx: (Math.random() - 0.5) * 0.3,
+    vy: (Math.random() - 0.5) * 0.3,
+    size: Math.random() * 1.5 + 0.3,
+    alpha: Math.random() * 0.3 + 0.05,
+    color: Math.random() > 0.7 ? '196,98,45' : '242,237,230'
+  });
+}
+
+function drawBg() {
+  bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+  // Grid lines
+  bgCtx.strokeStyle = 'rgba(196,98,45,0.04)';
+  bgCtx.lineWidth = 1;
+  for (let x = 0; x < bgCanvas.width; x += 80) {
+    bgCtx.beginPath();
+    bgCtx.moveTo(x, 0);
+    bgCtx.lineTo(x, bgCanvas.height);
+    bgCtx.stroke();
+  }
+  for (let y = 0; y < bgCanvas.height; y += 80) {
+    bgCtx.beginPath();
+    bgCtx.moveTo(0, y);
+    bgCtx.lineTo(bgCanvas.width, y);
+    bgCtx.stroke();
+  }
+
+  // Particles + connections
+  particles.forEach((p, i) => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0 || p.x > bgCanvas.width) p.vx *= -1;
+    if (p.y < 0 || p.y > bgCanvas.height) p.vy *= -1;
+
+    bgCtx.beginPath();
+    bgCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    bgCtx.fillStyle = `rgba(${p.color},${p.alpha})`;
+    bgCtx.fill();
+
+    for (let j = i + 1; j < particles.length; j++) {
+      const q = particles[j];
+      const d = Math.hypot(p.x - q.x, p.y - q.y);
+      if (d < 120) {
+        bgCtx.beginPath();
+        bgCtx.moveTo(p.x, p.y);
+        bgCtx.lineTo(q.x, q.y);
+        bgCtx.strokeStyle = `rgba(196,98,45,${0.04 * (1 - d/120)})`;
+        bgCtx.lineWidth = 0.5;
+        bgCtx.stroke();
+      }
+    }
+  });
+
+  requestAnimationFrame(drawBg);
+}
+drawBg();
+
+// ======== 3D BUILDING (Three.js-style manual renderer) ========
+const bc = document.getElementById('building-canvas');
+const bctx = bc.getContext('2d');
+bc.width = 500; bc.height = 500;
+
+let rotX = 0.3, rotY = 0.5;
+let isDragging = false;
+let lastX, lastY;
+let autoRotate = true;
+
+bc.addEventListener('mousedown', e => { isDragging = true; autoRotate = false; lastX = e.clientX; lastY = e.clientY; });
+bc.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  rotY += (e.clientX - lastX) * 0.01;
+  rotX += (e.clientY - lastY) * 0.01;
+  lastX = e.clientX; lastY = e.clientY;
+});
+bc.addEventListener('mouseup', () => isDragging = false);
+bc.addEventListener('mouseleave', () => isDragging = false);
+
+function project(x, y, z) {
+  const cos_x = Math.cos(rotX), sin_x = Math.sin(rotX);
+  const cos_y = Math.cos(rotY), sin_y = Math.sin(rotY);
+  const nx = x * cos_y - z * sin_y;
+  const nz = x * sin_y + z * cos_y;
+  const ny = y * cos_x - nz * sin_x;
+  const nzz = y * sin_x + nz * cos_x;
+  const fov = 400;
+  const scale = fov / (fov + nzz + 200);
+  return {
+    sx: nx * scale + 250,
+    sy: ny * scale + 250,
+    z: nzz,
+    scale
+  };
+}
+
+function drawFace(pts, fill, stroke, alpha = 1) {
+  if (pts.length < 3) return;
+  bctx.beginPath();
+  bctx.moveTo(pts[0].sx, pts[0].sy);
+  for (let i = 1; i < pts.length; i++) bctx.lineTo(pts[i].sx, pts[i].sy);
+  bctx.closePath();
+  bctx.fillStyle = fill.replace(')', `,${alpha})`).replace('rgb', 'rgba');
+  bctx.fill();
+  if (stroke) {
+    bctx.strokeStyle = `rgba(196,98,45,${alpha * 0.5})`;
+    bctx.lineWidth = 0.8;
+    bctx.stroke();
+  }
+}
+
+// Building geometry
+function makeBox(cx, cy, cz, w, h, d) {
+  const x0 = cx - w/2, x1 = cx + w/2;
+  const y0 = cy - h/2, y1 = cy + h/2;
+  const z0 = cz - d/2, z1 = cz + d/2;
+  return {
+    faces: [
+      // front, back, left, right, top, bottom
+      [[x0,y0,z1],[x1,y0,z1],[x1,y1,z1],[x0,y1,z1]], // front
+      [[x1,y0,z0],[x0,y0,z0],[x0,y1,z0],[x1,y1,z0]], // back
+      [[x0,y0,z0],[x0,y0,z1],[x0,y1,z1],[x0,y1,z0]], // left
+      [[x1,y0,z1],[x1,y0,z0],[x1,y1,z0],[x1,y1,z1]], // right
+      [[x0,y1,z1],[x1,y1,z1],[x1,y1,z0],[x0,y1,z0]], // top
+      [[x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1]], // bottom
+    ],
+    normals: [[0,0,1],[0,0,-1],[-1,0,0],[1,0,0],[0,1,0],[0,-1,0]],
+    lights: [0.9, 0.5, 0.7, 0.7, 1.0, 0.3]
+  };
+}
+
+const buildings = [
+  makeBox(0, 0, 0, 80, 180, 80),
+  makeBox(-90, 30, -10, 60, 120, 60),
+  makeBox(90, 50, 10, 50, 100, 50),
+  makeBox(0, 110, 0, 30, 40, 30),
+  makeBox(-20, 20, 50, 20, 30, 20),
+  makeBox(30, 40, -40, 25, 25, 25),
+];
+
+function getAvgZ(face) {
+  return face.reduce((s, v) => {
+    const p = project(v[0], v[1], v[2]);
+    return s + p.z;
+  }, 0) / face.length;
+}
+
+let t = 0;
+function drawBuilding() {
+  bctx.clearRect(0, 0, bc.width, bc.height);
+
+  // Background
+  bctx.fillStyle = '#0D0D0D';
+  bctx.fillRect(0, 0, bc.width, bc.height);
+
+  // Grid floor
+  const gridPts = [];
+  for (let gx = -200; gx <= 200; gx += 40) {
+    const a = project(gx, 90, -200);
+    const b = project(gx, 90, 200);
+    bctx.beginPath();
+    bctx.moveTo(a.sx, a.sy);
+    bctx.lineTo(b.sx, b.sy);
+    bctx.strokeStyle = 'rgba(196,98,45,0.08)';
+    bctx.lineWidth = 1;
+    bctx.stroke();
+  }
+  for (let gz = -200; gz <= 200; gz += 40) {
+    const a = project(-200, 90, gz);
+    const b = project(200, 90, gz);
+    bctx.beginPath();
+    bctx.moveTo(a.sx, a.sy);
+    bctx.lineTo(b.sx, b.sy);
+    bctx.strokeStyle = 'rgba(196,98,45,0.08)';
+    bctx.lineWidth = 1;
+    bctx.stroke();
+  }
+
+  // Collect all faces with depth
+  const allFaces = [];
+  buildings.forEach(box => {
+    box.faces.forEach((face, fi) => {
+      const projected = face.map(v => project(v[0], v[1], v[2]));
+      const avgZ = face.reduce((s, v) => s + project(v[0],v[1],v[2]).z, 0) / face.length;
+      allFaces.push({ projected, light: box.lights[fi], z: avgZ });
+    });
+  });
+
+  // Sort by depth (painter's algorithm)
+  allFaces.sort((a, b) => b.z - a.z);
+
+  allFaces.forEach(({ projected, light }) => {
+    const l = Math.round(light * 30);
+    drawFace(projected, `rgb(${l+10},${l+8},${l+5})`, true, 1);
+
+    // Window grid effect on faces
+    if (light > 0.7 && projected.length === 4) {
+      const p = projected;
+      for (let row = 1; row < 5; row++) {
+        for (let col = 1; col < 4; col++) {
+          const tx = p[0].sx + (p[1].sx - p[0].sx) * col/4;
+          const ty = p[0].sy + (p[1].sy - p[0].sy) * col/4;
+          const bx = p[3].sx + (p[2].sx - p[3].sx) * col/4;
+          const by = p[3].sy + (p[2].sy - p[3].sy) * col/4;
+          const wx = tx + (bx - tx) * row/5;
+          const wy = ty + (by - ty) * row/5;
+          const lit = (Math.sin(t * 0.5 + row * 1.7 + col * 2.3) > 0.3) ? 0.6 : 0.08;
+          bctx.fillStyle = `rgba(184,146,42,${lit})`;
+          bctx.fillRect(wx - 3, wy - 4, 6, 8);
+        }
+      }
+    }
+  });
+
+  // Crane arm
+  const craneBase = project(-140, 80, 0);
+  const craneTop = project(-140, -80, 0);
+  const craneArm = project(40, -80, 0);
+  const craneWire = project(40, -20, 0);
+  bctx.beginPath();
+  bctx.moveTo(craneBase.sx, craneBase.sy);
+  bctx.lineTo(craneTop.sx, craneTop.sy);
+  bctx.lineTo(craneArm.sx, craneArm.sy);
+  bctx.strokeStyle = 'rgba(196,98,45,0.5)';
+  bctx.lineWidth = 2;
+  bctx.stroke();
+  bctx.beginPath();
+  bctx.moveTo(craneArm.sx, craneArm.sy);
+  bctx.lineTo(craneWire.sx, craneWire.sy);
+  bctx.strokeStyle = 'rgba(196,98,45,0.3)';
+  bctx.lineWidth = 1;
+  bctx.stroke();
+
+  if (autoRotate) rotY += 0.005;
+  t += 0.03;
+  requestAnimationFrame(drawBuilding);
+}
+drawBuilding();
+
+// ======== SCROLL REVEAL ========
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.15 });
+reveals.forEach(el => observer.observe(el));
+
+// ======== COUNTER ANIMATION ========
+function animateCounter(el, target) {
+  let current = 0;
+  const step = target / 60;
+  const timer = setInterval(() => {
+    current = Math.min(current + step, target);
+    el.textContent = Math.floor(current) + (el.dataset.target == 24 ? '' : '+');
+    if (current >= target) clearInterval(timer);
+  }, 25);
+}
+
+const statObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      document.querySelectorAll('.stat-num').forEach(el => {
+        animateCounter(el, parseInt(el.dataset.target));
+      });
+      statObserver.disconnect();
+    }
+  });
+}, { threshold: 0.5 });
+statObserver.observe(document.querySelector('.stats-row'));
+
+// ======== PARALLAX ========
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY;
+  const banner = document.getElementById('parallax-banner');
+  if (banner) {
+    const grid = banner.querySelector('.parallax-grid');
+    if (grid) grid.style.transform = `translateY(${scrollY * 0.1}px)`;
+  }
+});
+
+// ======== SMOOTH ANCHOR SCROLL ========
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+</script>
+</body>
+</html>
